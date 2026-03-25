@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
-const path = require('path');
 const app = express();
 
 const connection = mysql.createConnection({
@@ -14,40 +13,32 @@ const connection = mysql.createConnection({
 });
 
 app.get('/', (req, res) => {
-  // This part pulls data from TiDB
   connection.query('SELECT * FROM projects', (err, results) => {
-    if (err) {
-      return res.send('Database Error: ' + err.message);
-    }
+    if (err) return res.send("DB Connection Error: " + err.message);
+
+    // This part generates the project cards dynamically
+    const projectCards = results.map(p => `
+      <div class="card">
+        <h3 style="margin-top:0; color:#00d4ff;">${p.title}</h3>
+        <p>${p.description}</p>
+        <span style="font-size:0.8rem; color:#8b949e;">Tech: Node.js, SQL</span>
+      </div>
+    `).join('');
+
+    // Read the HTML but inject our dynamic cards
+    const fs = require('fs');
+    const htmlPath = require('path').join(__dirname, 'index.html');
+    let htmlContent = fs.readFileSync(htmlPath, 'utf8');
     
-    // This part builds the HTML with the Database data
-    let projectHtml = results.map(p => `<li><strong>${p.title}</strong>: ${p.description}</li>`).join('');
-    
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Portfolio</title>
-        <style>
-          body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f4f4f4; }
-          .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 400px; }
-          h1 { color: #007bff; }
-          ul { padding-left: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <h1>Yash's Portfolio</h1>
-          <p>This data is coming from <strong>TiDB Cloud</strong>:</p>
-          <ul>${projectHtml}</ul>
-          <hr>
-          <p style="font-size: 12px; color: green;">Status: Connected to Database</p>
-        </div>
-      </body>
-      </html>
-    `);
+    // Swap the placeholder with real data
+    const finalHtml = htmlContent.replace(
+      '<div class="card"><p>Connecting to TiDB Cloud...</p></div>', 
+      projectCards
+    );
+
+    res.send(finalHtml);
   });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Live at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log('Portfolio running on port ' + PORT));
