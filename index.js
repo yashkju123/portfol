@@ -1,7 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
+const path = require('path');
 const app = express();
+
+app.use(express.urlencoded({ extended: true })); // Lets us read form data
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -12,33 +15,38 @@ const connection = mysql.createConnection({
   ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
 });
 
+// MAIN ROUTE: Shows Portfolio + Visitor Counter
 app.get('/', (req, res) => {
-  connection.query('SELECT * FROM projects', (err, results) => {
-    if (err) return res.send("DB Connection Error: " + err.message);
+  // Update Visitor Count in DB
+  connection.query('UPDATE stats SET views = views + 1 WHERE id = 1');
 
-    // This part generates the project cards dynamically
+  // Get everything to show the user
+  connection.query('SELECT (SELECT views FROM stats WHERE id = 1) as viewCount, title, description FROM projects', (err, results) => {
+    if (err) return res.send("DB Error: " + err.message);
+
+    const viewCount = results[0]?.viewCount || 0;
     const projectCards = results.map(p => `
       <div class="card">
-        <h3 style="margin-top:0; color:#00d4ff;">${p.title}</h3>
+        <h3 style="color:#00d4ff;">${p.title}</h3>
         <p>${p.description}</p>
-        <span style="font-size:0.8rem; color:#8b949e;">Tech: Node.js, SQL</span>
       </div>
     `).join('');
 
-    // Read the HTML but inject our dynamic cards
-    const fs = require('fs');
-    const htmlPath = require('path').join(__dirname, 'index.html');
-    let htmlContent = fs.readFileSync(htmlPath, 'utf8');
-    
-    // Swap the placeholder with real data
-    const finalHtml = htmlContent.replace(
-      '<div class="card"><p>Connecting to TiDB Cloud...</p></div>', 
-      projectCards
-    );
+    res.send(require('fs').readFileSync('./index.html', 'utf8')
+      .replace('{{PROJECTS}}', projectCards)
+      .replace('{{VIEWS}}', viewCount));
+  });
+});
 
-    res.send(finalHtml);
+// CONTACT ROUTE: Proof of DB Writing
+app.post('/contact', (req, res) => {
+  const { name, email, msg } = req.body;
+  const sql = 'INSERT INTO messages (name, email, message) VALUES (?, ?, ?)';
+  connection.query(sql, [name, email, msg], (err) => {
+    if (err) return res.send("Error saving message.");
+    res.send('<h1>Message Sent!</h1><a href="/">Go Back</a>');
   });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Portfolio running on port ' + PORT));
+app.listen(PORT, () => console.log('Portfolio Live!'));

@@ -5,69 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yash | Full-Stack Portfolio</title>
     <style>
-        :root { --primary: #00d4ff; --bg: #0a0b10; --card: #161b22; --text: #ffffff; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.6; }
-        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-        
-        /* Header Section */
-        header { text-align: center; padding: 60px 0; border-bottom: 1px solid #30363d; }
-        h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, #00d4ff, #0055ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .subtitle { color: #8b949e; font-size: 1.2rem; margin-top: 10px; }
-
-        /* Section Styling */
-        section { margin-top: 50px; }
-        h2 { border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 30px; }
-
-        /* Grid for Projects */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 12px; transition: 0.3s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        
-        /* Skill Tags */
-        .skills-list { display: flex; flex-wrap: wrap; gap: 10px; }
-        .skill-tag { background: #1f2937; color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; border: 1px solid #30363d; }
-
-        /* DB Status Footer */
-        footer { margin-top: 80px; text-align: center; color: #8b949e; font-size: 0.9rem; }
-        .live-dot { height: 10px; width: 10px; background-color: #238636; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        :root { --primary: #00d4ff; --bg: #0d1117; --card: #161b22; --text: #c9d1d9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        header { text-align: center; padding: 50px 0; border-bottom: 1px solid #30363d; }
+        h1 { color: white; font-size: 2.5rem; margin: 0; }
+        .counter-badge { background: #238636; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        section { margin-top: 40px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: var(--card); border: 1px solid #30363d; padding: 20px; border-radius: 10px; }
+        form { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid #30363d; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; background: #0d1117; border: 1px solid #30363d; color: white; box-sizing: border-box; }
+        button { background: var(--primary); border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Yash</h1>
-            <p class="subtitle">Computer Science Student & Full-Stack Developer</p>
+            <p>Full-Stack Engineer | <span class="counter-badge">Profile Views: {{VIEWS}}</span></p>
         </header>
 
-        <section id="about">
-            <h2>About Me</h2>
-            <p>I am a passionate developer currently pursuing my Engineering degree. This portfolio showcases my ability to integrate modern cloud databases with scalable backend services.</p>
+        <section>
+            <h2>DB Proof #1: Dynamic Projects</h2>
+            <div class="grid">{{PROJECTS}}</div>
         </section>
 
-        <section id="skills">
-            <h2>Technical Stack</h2>
-            <div class="skills-list">
-                <span class="skill-tag">HTML5 / CSS3</span>
-                <span class="skill-tag">JavaScript (ES6+)</span>
-                <span class="skill-tag">Node.js</span>
-                <span class="skill-tag">Express.js</span>
-                <span class="skill-tag">MySQL / TiDB</span>
-                <span class="skill-tag">Git / GitHub</span>
-            </div>
+        <section>
+            <h2>DB Proof #2: Send a Message (Writes to TiDB)</h2>
+            <form action="/contact" method="POST">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="msg" placeholder="Your Message" rows="4" required></textarea>
+                <button type="submit">Send to Database</button>
+            </form>
         </section>
 
-        <section id="projects">
-            <h2>Featured Projects</h2>
-            <div class="grid" id="project-list">
-                <div class="card">
-                    <p>Connecting to TiDB Cloud...</p>
-                </div>
-            </div>
-        </section>
-
-        <footer>
-            <p><span class="live-dot"></span> System Status: Connected to TiDB Distributed SQL</p>
-            <p>&copy; 2026 Yash | Built with Node.js & Render</p>
+        <footer style="text-align:center; padding: 40px; color: #8b949e;">
+            Built with TiDB Cloud, Node.js & Render.
         </footer>
     </div>
 </body>
