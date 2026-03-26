@@ -1,52 +1,68 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
+const fs = require('fs');
 const path = require('path');
 const app = express();
 
-app.use(express.urlencoded({ extended: true })); // Lets us read form data
+app.use(express.urlencoded({ extended: true }));
 
-const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
+// This allows the browser to get yash.jpg, but won't auto-serve index.html anymore
+app.use(express.static(__dirname)); 
+
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
 });
 
-// MAIN ROUTE: Shows Portfolio + Visitor Counter
-app.get('/', (req, res) => {
-  // Update Visitor Count in DB
-  connection.query('UPDATE stats SET views = views + 1 WHERE id = 1');
+app.get('/', async (req, res) => {
+    try {
+        // 1. Database Operations
+        await pool.query('UPDATE stats SET views = views + 1 WHERE id = 1');
+        const [stats] = await pool.query('SELECT views FROM stats WHERE id = 1');
+        const [projects] = await pool.query('SELECT * FROM projects');
 
-  // Get everything to show the user
-  connection.query('SELECT (SELECT views FROM stats WHERE id = 1) as viewCount, title, description FROM projects', (err, results) => {
-    if (err) return res.send("DB Error: " + err.message);
+        const viewCount = stats[0] ? stats[0].views : "0";
+        
+        // 2. Map Projects to HTML
+        const projectHtml = projects.map(p => `
+            <div style="background:#161b22; padding:15px; border-radius:10px; border:1px solid #30363d; margin-bottom:10px;">
+                <h3 style="color:#00d4ff; margin:0;">${p.title}</h3>
+                <p style="margin:5px 0 0 0;">${p.description}</p>
+            </div>
+        `).join('');
 
-    const viewCount = results[0]?.viewCount || 0;
-    const projectCards = results.map(p => `
-      <div class="card">
-        <h3 style="color:#00d4ff;">${p.title}</h3>
-        <p>${p.description}</p>
-      </div>
-    `).join('');
+        // 3. Read the NEW filename
+        const htmlPath = path.join(__dirname, 'template.html');
+        let htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
-    res.send(require('fs').readFileSync('./index.html', 'utf8')
-      .replace('{{PROJECTS}}', projectCards)
-      .replace('{{VIEWS}}', viewCount));
-  });
+        // 4. Force the replacement
+        console.log(`Success: Injecting ${viewCount} views into template.`);
+        
+        htmlContent = htmlContent.replace(/{{VIEWS}}/g, viewCount);
+        htmlContent = htmlContent.replace(/{{PROJECTS}}/g, projectHtml || "No projects found in TiDB.");
+
+        // 5. Send the modified content
+        res.send(htmlContent);
+
+    } catch (error) {
+        console.error("DB ERROR:", error.message);
+        res.status(500).send("Database Error: " + error.message);
+    }
 });
 
-// CONTACT ROUTE: Proof of DB Writing
-app.post('/contact', (req, res) => {
-  const { name, email, msg } = req.body;
-  const sql = 'INSERT INTO messages (name, email, message) VALUES (?, ?, ?)';
-  connection.query(sql, [name, email, msg], (err) => {
-    if (err) return res.send("Error saving message.");
-    res.send('<h1>Message Sent!</h1><a href="/">Go Back</a>');
-  });
+app.post('/contact', async (req, res) => {
+    try {
+        const { name, email, msg } = req.body;
+        await pool.query('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)', [name, email, msg]);
+        res.send('<h1>Saved to TiDB!</h1><a href="/">Go Back</a>');
+    } catch (err) {
+        res.status(500).send("Form Error");
+    }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Portfolio Live!'));
+app.listen(3000, () => console.log('Server live at http://localhost:3000'));

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yash | Portfolio</title>
+    <style>
+        :root { --primary: #00d4ff; --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --border: #30363d; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.6; }
+        .container { max-width: 850px; margin: 20px auto; }
+        header { background: var(--card); border: 1px solid var(--border); padding: 30px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .yash-photo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; background: #30363d; }
+        .header-text h1 { color: #fff; margin: 0; font-size: 2rem; }
+        .view-badge { background: #238636; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; display: inline-block; margin-top: 10px; }
+        section, .form-box { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 20px; }
+        h2 { color: var(--primary); font-size: 1.2rem; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 0; }
+        .score { color: #fff; font-weight: bold; background: #30363d; padding: 2px 6px; border-radius: 4px; }
+        .skill-tag { display: inline-block; background: #0d1117; border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 6px; margin: 4px; font-size: 0.8rem; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #0d1117; border: 1px solid var(--border); color: white; border-radius: 6px; box-sizing: border-box; }
+        button { background: var(--primary); color: #000; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="yash.jpg" alt="Yash" class="yash-photo">
+            <div class="header-text">
+                <h1>YASH</h1>
+                <p style="margin:5px 0;">BSc AI & ML Student | Kristu Jayanti University</p>
+                <div class="view-badge">LIVE VIEWS: {{VIEWS}}</div>
+            </div>
+        </header>
+
+        <section>
+            <h2>About Me</h2>
+            <p>To obtain a good position in a company where I can use my skills, learn new things, and grow in my career.</p>
+            <p>📍 Babusapalya, Bangalore | 📞 7795194616</p>
+        </section>
+
+        <section>
+            <h2>Education</h2>
+            <p><strong>BSc AI & ML</strong> | Kristu Jayanti University (2028)</p>
+            <p><strong>2nd PUC</strong> | Score: <span class="score">91.25%</span></p>
+            <p><strong>10th Grade</strong> | Score: <span class="score">90.8%</span></p>
+        </section>
+
+        <section>
+            <h2>Certifications</h2>
+            <ul style="padding-left: 20px; margin: 0;">
+                <li>NASSCOM Digital Engineering – Gold</li>
+                <li>Infosys: HTML5, CSS3, JS</li>
+                <li>IBM SkillsBuild: AI Certifications</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Skills</h2>
+            <div class="skills">
+                <span class="skill-tag">Node.js</span><span class="skill-tag">Express</span>
+                <span class="skill-tag">MySQL (TiDB)</span><span class="skill-tag">C++</span>
+                <span class="skill-tag">Java</span><span class="skill-tag">Python</span>
+            </div>
+        </section>
+
+        <section>
+            <h2>Live Projects (from TiDB)</h2>
+            <div id="project-container">{{PROJECTS}}</div>
+        </section>
+
+        <div class="form-box">
+            <h2>Contact (Saves to TiDB)</h2>
+            <form action="/contact" method="POST">
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <textarea name="msg" placeholder="Message" rows="2" required></textarea>
+                <button type="submit">SUBMIT TO CLOUD</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
